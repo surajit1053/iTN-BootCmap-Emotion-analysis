@@ -143,11 +143,65 @@ export default function UploadPage() {
                 recorder.ondataavailable = (e) => audioChunks.push(e.data);
 
                 recorder.start();
-                alert("Recording started... Speak now!");
+                const startPopup = document.createElement("div");
+                startPopup.innerHTML = "🎙️ <strong>Recording started!</strong><br/><span style='font-size:14px;'>Speak now and express your emotions!</span>";
+                Object.assign(startPopup.style, {
+                  position: "fixed",
+                  top: "20px",
+                  right: "20px",
+                  background: "linear-gradient(135deg, #2563eb, #9333ea)",
+                  color: "white",
+                  padding: "16px 20px",
+                  borderRadius: "10px",
+                  boxShadow: "0 4px 12px rgba(0,0,0,0.3)",
+                  zIndex: "10000",
+                  fontFamily: "system-ui, sans-serif",
+                  textAlign: "center",
+                  animation: "fadeInOut 6s ease-in-out forwards"
+                });
+
+                const fadeKeyframes = document.createElement("style");
+                fadeKeyframes.innerHTML = `
+                  @keyframes fadeInOut {
+                    0% { opacity: 0; transform: translateY(-10px); }
+                    10%, 90% { opacity: 1; transform: translateY(0); }
+                    100% { opacity: 0; transform: translateY(-10px); }
+                  }
+                `;
+                document.head.appendChild(fadeKeyframes);
+                document.body.appendChild(startPopup);
+                setTimeout(() => startPopup.remove(), 5500);
 
                 setTimeout(async () => {
                   recorder.stop();
-                  alert("Recording stopped. Sending for analysis...");
+                  const stopPopup = document.createElement("div");
+                  stopPopup.innerHTML = "🛑 <strong>Recording stopped</strong><br/><span style='font-size:14px;'>Processing your voice for emotion analysis...</span>";
+                  Object.assign(stopPopup.style, {
+                    position: "fixed",
+                    top: "20px",
+                    right: "20px",
+                    background: "linear-gradient(135deg, #ef4444, #f97316)",
+                    color: "white",
+                    padding: "16px 20px",
+                    borderRadius: "10px",
+                    boxShadow: "0 4px 12px rgba(0,0,0,0.3)",
+                    zIndex: "10000",
+                    fontFamily: "system-ui, sans-serif",
+                    textAlign: "center",
+                    animation: "fadeInOut 6s ease-in-out forwards"
+                  });
+
+                  const fadeKeyframes = document.createElement("style");
+                  fadeKeyframes.innerHTML = `
+                    @keyframes fadeInOut {
+                      0% { opacity: 0; transform: translateY(-10px); }
+                      10%, 90% { opacity: 1; transform: translateY(0); }
+                      100% { opacity: 0; transform: translateY(-10px); }
+                    }
+                  `;
+                  document.head.appendChild(fadeKeyframes);
+                  document.body.appendChild(stopPopup);
+                  setTimeout(() => stopPopup.remove(), 5500);
 
                   recorder.onstop = async () => {
                     const audioBlob = new Blob(audioChunks, { type: "audio/wav" });
@@ -163,7 +217,35 @@ export default function UploadPage() {
                     if (data.error) {
                       alert(`Error: ${data.error}`);
                     } else {
-                      alert(`Speech converted to text: ${data.transcribed_text}`);
+                      const convertedPopup = document.createElement("div");
+                      convertedPopup.innerHTML = `💬 <strong>Speech converted to text</strong><br/><span style='font-size:14px;'>\"${data.transcribed_text}\"</span>`;
+                      Object.assign(convertedPopup.style, {
+                        position: "fixed",
+                        top: "20px",
+                        right: "20px",
+                        background: "linear-gradient(135deg, #10b981, #14b8a6)",
+                        color: "white",
+                        padding: "16px 22px",
+                        borderRadius: "10px",
+                        boxShadow: "0 4px 12px rgba(0,0,0,0.35)",
+                        zIndex: "10000",
+                        fontFamily: "system-ui, sans-serif",
+                        textAlign: "center",
+                        lineHeight: "1.4",
+                        animation: "fadeInOut 7s ease-in-out forwards"
+                      });
+
+                      const fadeKeyframes = document.createElement("style");
+                      fadeKeyframes.innerHTML = `
+                        @keyframes fadeInOut {
+                          0% { opacity: 0; transform: translateY(-10px); }
+                          10%, 90% { opacity: 1; transform: translateY(0); }
+                          100% { opacity: 0; transform: translateY(-10px); }
+                        }
+                      `;
+                      document.head.appendChild(fadeKeyframes);
+                      document.body.appendChild(convertedPopup);
+                      setTimeout(() => convertedPopup.remove(), 6500);
                       if (data.emotions) {
                         const formatted = Object.entries(data.emotions)
                           .map(([label, score]) => `${label}: ${score}`)
