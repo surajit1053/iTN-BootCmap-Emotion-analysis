@@ -104,9 +104,12 @@ export default function UploadPage() {
       </section>
 
       <section className="bg-white/80 backdrop-blur-lg border border-gray-200 shadow-2xl rounded-2xl p-8 w-full max-w-2xl mt-10 transition-all duration-300">
-        <h2 className="text-2xl font-semibold mb-5 text-gray-800 flex items-center justify-center">
+        <h2 className="text-2xl font-semibold mb-2 text-gray-800 flex items-center justify-center">
           🎵 File Upload Emotion Analysis
         </h2>
+        <p className="text-center text-gray-500 text-sm mb-5">
+          Supported file types: <strong>.wav, .mp3, .m4a, .ogg, .flac, .aac, .mp4, .mov, .webm, .mkv, .avi</strong>
+        </p>
         <form onSubmit={handleFileSubmit} className="flex flex-col gap-5">
           <input
             type="file"
@@ -122,6 +125,61 @@ export default function UploadPage() {
             }`}
           >
             {loading ? "Uploading..." : "🎧 Analyze File Emotions"}
+          </button>
+        </form>
+      </section>
+
+      <section className="bg-white/80 backdrop-blur-lg border border-gray-200 shadow-2xl rounded-2xl p-8 w-full max-w-2xl mt-10 transition-all duration-300">
+        <h2 className="text-2xl font-semibold mb-5 text-gray-800 flex items-center justify-center">
+          📷 Image Upload Emotion Analysis
+        </h2>
+        <p className="text-center text-gray-500 text-sm mb-5">
+          Supported image formats: <strong>.jpg, .jpeg, .png, .bmp, .webp</strong>
+        </p>
+        <form
+          onSubmit={async (e) => {
+            e.preventDefault();
+            if (!file) return alert("Please select an image file.");
+            try {
+              setLoading(true);
+              const formData = new FormData();
+              formData.append("file", file);
+              const res = await fetch("http://127.0.0.1:8000/api/v1/analyze/image", {
+                method: "POST",
+                body: formData,
+              });
+              const data = await res.json();
+              if (data.error) {
+                alert(`Error: ${data.error}`);
+              } else if (data.emotions) {
+                const formatted = Object.entries(data.emotions)
+                  .map(([emotion, score]) => `${emotion}: ${score}`)
+                  .join(", ");
+                setResult(formatted);
+              }
+            } catch (err) {
+              alert("Error during image-based emotion detection.");
+              console.error(err);
+            } finally {
+              setLoading(false);
+            }
+          }}
+          className="flex flex-col gap-5"
+        >
+          <input
+            type="file"
+            accept="image/*"
+            onChange={(e) => setFile(e.target.files ? e.target.files[0] : null)}
+            className="border border-gray-300 p-3 rounded-lg text-gray-700 shadow-sm focus:ring-2 focus:ring-blue-300 focus:border-blue-400 outline-none transition-all duration-200"
+          />
+          <button
+            type="submit"
+            disabled={loading}
+            className={`py-3 font-semibold text-white rounded-lg bg-gradient-to-r from-indigo-500 to-blue-500 hover:from-indigo-600 hover:to-blue-600 transition-transform transform hover:scale-[1.03] duration-200 shadow-md ${
+              loading ? "opacity-70 cursor-wait" : ""
+            }`}
+          >
+            {loading ? "Analyzing..." : "🧠 Analyze Image Emotions"}
           </button>
         </form>
       </section>
@@ -270,9 +328,37 @@ export default function UploadPage() {
       </section>
 
       {result && (
-        <div className="mt-10 p-6 bg-gradient-to-tr from-blue-50 to-purple-50 rounded-xl text-center shadow-inner border border-gray-100 w-full max-w-2xl">
-          <h3 className="font-bold text-2xl text-gray-800 mb-4">💡 Emotion Analysis Result</h3>
-          <p className="text-gray-700 text-lg leading-relaxed">{result}</p>
+        <div
+          className="fixed inset-0 flex items-center justify-center bg-black/20 backdrop-blur-sm z-50 transition-colors duration-300"
+          onClick={(e) => {
+            if (e.target === e.currentTarget) setResult(null);
+          }}
+        >
+          <div className="bg-white rounded-2xl shadow-2xl p-8 max-w-lg w-full text-center relative animate-fadeIn border border-gray-200">
+            <button
+              onClick={() => setResult(null)}
+              className="absolute top-3 right-3 text-gray-500 hover:text-gray-700 text-xl font-bold"
+            >
+              ×
+            </button>
+            <h3 className="font-bold text-2xl text-gray-800 mb-4">💡 Emotion Analysis Result</h3>
+            <p className="text-gray-700 text-lg leading-relaxed whitespace-pre-line">{result}</p>
+          </div>
+          <style jsx>{`
+            @keyframes fadeIn {
+              from {
+                opacity: 0;
+                transform: scale(0.95);
+              }
+              to {
+                opacity: 1;
+                transform: scale(1);
+              }
+            }
+            .animate-fadeIn {
+              animation: fadeIn 0.3s ease-out;
+            }
+          `}</style>
         </div>
       )}
     </main>

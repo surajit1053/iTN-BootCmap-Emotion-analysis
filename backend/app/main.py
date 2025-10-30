@@ -203,3 +203,46 @@ def analyze_speech(file: UploadFile = File(...)):
         return JSONResponse(status_code=400, content={"error": "Speech not recognized. Try again."})
     except Exception as e:
         return JSONResponse(status_code=500, content={"error": str(e)})
+
+# New Image-based Emotion Detection endpoint (fix import for FER usage)
+from fer.fer import FER
+from fastapi import File, UploadFile
+from PIL import Image
+import io
+import numpy as np
+
+import logging
+logging.basicConfig(level=logging.INFO)
+logger = logging.getLogger("emotion-image-debug")
+
+@app.post("/api/v1/analyze/image")
+async def analyze_image(file: UploadFile = File(...)):
+    """
+    Detects emotions from an uploaded face image (JPEG, PNG, etc.)
+    using the FER pretrained facial emotion recognition model.
+    """
+    try:
+        logger.info("Received image: %s", file.filename)
+        contents = await file.read()
+        image = Image.open(io.BytesIO(contents)).convert("RGB")
+        logger.info("Image loaded successfully. Size: %s, Mode: %s", image.size, image.mode)
+
+        detector = FER(mtcnn=True)
+        np_image = np.array(image)
+        logger.info("Running FER detector...")
+
+        results = detector.detect_emotions(np_image)
+        logger.info("FER raw results: %s", results)
+
+        if not results:
+            logger.warning("No face detected or invalid image.")
+            return JSONResponse(status_code=400, content={"error": "No face detected or invalid/unclear image."})
+
+        emotions = results[0]["emotions"]
+        logger.info("Extracted emotions: %s", emotions)
+        emotions_summary = {k: round(v, 3) for k, v in emotions.items()}
+        logger.info("Emotion summary: %s", emotions_summary)
+        return {"emotions": emotions_summary}
+    except Exception as e:
+        logger.exception("Error processing image: %s", e)
+        return JSONResponse(status_code=500, content={"error": str(e)})
