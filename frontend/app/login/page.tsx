@@ -94,9 +94,6 @@ export default function LoginPage() {
             Sign Up
           </a>
         </p>
-        <p className="text-center text-gray-500 mt-2 text-xs">
-          Tip: Use <span className="font-semibold text-gray-800">admin / admin</span> to log in 🪄
-        </p>
       </div>
     </main>
   );

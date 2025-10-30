@@ -341,8 +341,40 @@ export default function UploadPage() {
             >
               ×
             </button>
-            <h3 className="font-bold text-2xl text-gray-800 mb-4">💡 Emotion Analysis Result</h3>
-            <p className="text-gray-700 text-lg leading-relaxed whitespace-pre-line">{result}</p>
+            <h3 className="font-bold text-2xl text-gray-800 mb-6 animate-pulse">💡 Emotion Analysis Result</h3>
+            
+            <div className="grid grid-cols-2 gap-3 text-center">
+              {result.split(",").map((pair, index) => {
+                const [emotion, score] = pair.split(":").map(item => item.trim());
+                return (
+                  <div
+                    key={index}
+                    className="bg-gradient-to-r from-blue-100 via-purple-100 to-pink-100 p-4 rounded-lg shadow hover:shadow-lg transform hover:scale-105 transition-all duration-300"
+                  >
+                    <h4 className="text-lg font-semibold text-gray-800 capitalize">{emotion}</h4>
+                    <p className="text-md text-gray-600 mt-1">Score: <strong>{score}</strong></p>
+                  </div>
+                );
+              })}
+            </div>
+
+            <div className="mt-6 flex justify-center gap-4">
+              <button
+                className="px-5 py-2 rounded-md bg-gradient-to-r from-green-500 to-teal-500 text-white font-semibold shadow-md hover:scale-105 transition duration-300"
+                onClick={() => setResult(null)}
+              >
+                Analyze Again
+              </button>
+              <button
+                className="px-5 py-2 rounded-md bg-gradient-to-r from-blue-500 to-indigo-500 text-white font-semibold shadow-md hover:scale-105 transition duration-300"
+                onClick={() => {
+                  navigator.clipboard.writeText(result);
+                  alert("Results copied to clipboard!");
+                }}
+              >
+                Copy Results
+              </button>
+            </div>
           </div>
           <style jsx>{`
             @keyframes fadeIn {

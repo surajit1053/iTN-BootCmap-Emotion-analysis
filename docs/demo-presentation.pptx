@@ -1,0 +1,114 @@
+# PowerPoint Presentation: iTN-BootCmap Emotion Analysis Demo
+
+## Slide 1: Title
+**Project:** Emotion Analysis Platform  
+**Team:** iTN BootCmap  
+**Description:** A multi-modal AI system that analyzes emotions from text, voice, and images.  
+*(Include logo or branding if available.)*
+
+---
+
+## Slide 2: Login & Signup Screens
+- Clean, minimal authentication screens  
+- Users can create accounts and log in securely  
+- JWT-based authentication implemented in FastAPI backend  
+- After login, users access personalized dashboard  
+
+*(Add screenshots: `frontend/app/login/page.tsx`, `frontend/app/signup/page.tsx`)*
+
+---
+
+## Slide 3: Dashboard Overview
+- Displays quick navigation tiles for available emotion analysis modes:  
+  - Text  
+  - File Upload (Audio/Video)  
+  - Image Upload  
+  - Speech-to-Text  
+- Connected to FastAPI backend API endpoints.
+
+*(Add screenshot from `frontend/app/dashboard/page.tsx`)*
+
+---
+
+## Slide 4: Text-Based Emotion Analysis
+- Users can input text to detect emotional tone.  
+- Model: `distilbert-base-uncased-emotion` (Hugging Face).  
+- Output: emotion probabilities such as joy, sadness, anger, etc.
+
+*(Add screenshot from top section of `frontend/app/upload/page.tsx`)*  
+
+---
+
+## Slide 5: File Upload Emotion Analysis  
+- Upload **audio/video** files (supported formats: `.wav`, `.mp3`, `.m4a`, `.mp4`, `.mov`, `.webm`).  
+- Extracts audio layer → speech → emotion inference.  
+- Uses Hugging Face + `speech_recognition`.
+
+*(Add screenshot of File Upload section from `frontend/app/upload/page.tsx`)*
+
+---
+
+## Slide 6: Image-Based Emotion Analysis  
+- Upload **image** containing face(s).  
+- Model: **FER (Facial Emotion Recognition)** with MTCNN support.  
+- Detects facial emotions (happy, sad, angry, surprised, etc.)  
+- Real-time debug logs show detected results.
+
+*(Add screenshot of Image Upload section.)*
+
+---
+
+## Slide 7: Speech-To-Text Emotion Analysis  
+- Records user input (5 seconds voice snippet).  
+- Converts speech → text → emotion prediction.  
+- Uses `speech_recognition` + `distilbert` pipeline.  
+- Displays detected emotions interactively.
+
+*(Add screenshot of live recording section.)*
+
+---
+
+## Slide 8: Results Popup  
+- Unified modal popup for displaying analytic results.  
+- Includes:
+  - Animated transitions
+  - Transparent background for contextual clarity  
+  - Dismissible interface  
+
+*(Add screenshot showing output modal with results.)*
+
+---
+
+## Slide 9: System Architecture
+- **Frontend:** Next.js + TailwindCSS  
+- **Backend:** FastAPI  
+- **ML Models:**
+  - Text → `distilbert-base-uncased-emotion`  
+  - Audio → Google Speech Recognition  
+  - Image → FER (MTCNN-based)  
+- **Storage:** Temporary in-memory processing  
+- **API:** CORS enabled, multi-modal REST API  
+
+*(Add diagram reference from `docs/architecture/architecture-evolution.md`.)*
+
+---
+
+## Slide 10: Demo Walkthrough  
+- Step 1: Launch FastAPI backend (`uvicorn app.main:app --reload --port 8000`)  
+- Step 2: Start Next.js frontend (`npm run dev`)  
+- Step 3: Navigate to `/upload`  
+- Step 4: Showcase each analysis mode live.  
+
+*(Insert short video/GIF snippets if available.)*
+
+---
+
+## Slide 11: Conclusion & Future Enhancements
+- ✅ Complete multi-modal emotion analysis system  
+- 🔜 Future Upgrades:
+  - Real-time webcam emotion detection  
+  - Continuous speech streaming  
+  - Sentiment + Emotional intensity mapping  
+- 🎯 Goal: Enhance behavioral analytics for better UX & business insights.  
+
+*(Include closing message and contact details.)*
