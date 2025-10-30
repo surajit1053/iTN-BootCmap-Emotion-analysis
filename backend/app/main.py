@@ -1,16 +1,7 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
-app = FastAPI()
-
-# Enable CORS for frontend - allow requests from localhost ports (Next.js)
-app.add_middleware(
-    CORSMiddleware,
-    allow_origins=["http://localhost:3000", "http://127.0.0.1:3000"],
-    allow_credentials=True,
-    allow_methods=["*"],
-    allow_headers=["*"],
-)
+app = FastAPI(title="Emotion Analysis API - Sprint 1")
 @app.get("/api/v1/health")
 def health():
     return {"status": "ok"}
@@ -26,7 +17,7 @@ from dotenv import load_dotenv
 
 load_dotenv()
 
-app = FastAPI(title="Emotion Analysis API - Sprint 1")
+# Unified app initialization is already done at the top
 
 # Enable full CORS handling (fixes 405 on OPTIONS)
 from fastapi.middleware.cors import CORSMiddleware
@@ -158,5 +149,57 @@ def analyze_emotion(request: AnalyzeRequest):
         results = emotion_model(request.text)
         summary = {r["label"]: round(r["score"], 3) for r in results}
         return {"emotions": summary}
+    except Exception as e:
+        return JSONResponse(status_code=500, content={"error": str(e)})
+
+
+# New Speech-to-Text and Emotion Analysis endpoint
+from fastapi import File, UploadFile
+import speech_recognition as sr
+
+@app.post("/api/v1/analyze/speech")
+def analyze_speech(file: UploadFile = File(...)):
+    """
+    Converts uploaded speech audio (wav/mp3/m4a/ogg) to text and performs emotion analysis.
+    Automatically converts unknown formats and ensures valid PCM-WAV input for recognition.
+    """
+    import tempfile
+    from pydub import AudioSegment
+    import os
+
+    try:
+        # Save uploaded file temporarily
+        with tempfile.NamedTemporaryFile(delete=False) as tmp_in:
+            tmp_in.write(file.file.read())
+            tmp_in_path = tmp_in.name
+
+        filename = file.filename.lower()
+        tmp_wav_path = tmp_in_path + ".wav"
+
+        # Use pydub to normalize to PCM WAV regardless of source format
+        try:
+            audio = AudioSegment.from_file(tmp_in_path)
+            audio = audio.set_frame_rate(16000).set_channels(1)
+            audio.export(tmp_wav_path, format="wav")
+        except Exception as convert_err:
+            return JSONResponse(status_code=400, content={"error": f"Could not convert audio: {convert_err}"})
+
+        recognizer = sr.Recognizer()
+        with sr.AudioFile(tmp_wav_path) as source:
+            audio_data = recognizer.record(source)
+
+        text = recognizer.recognize_google(audio_data)
+
+        # Emotion model inference
+        results = emotion_model(text)
+        summary = {r["label"]: round(r["score"], 3) for r in results}
+
+        # Clean temporary files
+        os.remove(tmp_in_path)
+        os.remove(tmp_wav_path)
+
+        return {"transcribed_text": text, "emotions": summary}
+    except sr.UnknownValueError:
+        return JSONResponse(status_code=400, content={"error": "Speech not recognized. Try again."})
     except Exception as e:
         return JSONResponse(status_code=500, content={"error": str(e)})

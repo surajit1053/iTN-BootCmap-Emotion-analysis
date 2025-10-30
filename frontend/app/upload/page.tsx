@@ -126,6 +126,67 @@ export default function UploadPage() {
         </form>
       </section>
 
+      <section className="bg-white/80 backdrop-blur-lg border border-gray-200 shadow-2xl rounded-2xl p-8 w-full max-w-2xl mt-10 transition-all duration-300">
+        <h2 className="text-2xl font-semibold mb-5 text-gray-800 flex items-center justify-center">
+          🎙️ Speech to Text Emotion Analysis
+        </h2>
+        <p className="text-gray-600 text-center mb-4 text-sm">
+          Record your voice to auto-convert speech to text and analyze emotions instantly.
+        </p>
+        <div className="flex justify-center">
+          <button
+            onClick={async () => {
+              try {
+                const mediaRecorder = await navigator.mediaDevices.getUserMedia({ audio: true });
+                const recorder = new MediaRecorder(mediaRecorder);
+                const audioChunks: any[] = [];
+                recorder.ondataavailable = (e) => audioChunks.push(e.data);
+
+                recorder.start();
+                alert("Recording started... Speak now!");
+
+                setTimeout(async () => {
+                  recorder.stop();
+                  alert("Recording stopped. Sending for analysis...");
+
+                  recorder.onstop = async () => {
+                    const audioBlob = new Blob(audioChunks, { type: "audio/wav" });
+                    const formData = new FormData();
+                    formData.append("file", audioBlob, "recording.wav");
+
+                    const response = await fetch("http://127.0.0.1:8000/api/v1/analyze/speech", {
+                      method: "POST",
+                      body: formData,
+                    });
+
+                    const data = await response.json();
+                    if (data.error) {
+                      alert(`Error: ${data.error}`);
+                    } else {
+                      alert(`Speech converted to text: ${data.transcribed_text}`);
+                      if (data.emotions) {
+                        const formatted = Object.entries(data.emotions)
+                          .map(([label, score]) => `${label}: ${score}`)
+                          .join(", ");
+                        setResult(formatted);
+                      } else {
+                        setResult(JSON.stringify(data, null, 2));
+                      }
+                    }
+                  };
+                }, 5000); // Record for 5 seconds
+              } catch (err) {
+                alert("Error accessing microphone. Please enable permissions.");
+                console.error(err);
+              }
+            }}
+            className="py-3 px-6 rounded-lg font-semibold text-white bg-gradient-to-r from-orange-500 to-red-500 hover:from-orange-600 hover:to-red-600 shadow-md transform transition-transform hover:scale-[1.03] duration-200"
+          >
+            🎤 Start Speech Analysis
+          </button>
+        </div>
+      </section>
+
       {result && (
         <div className="mt-10 p-6 bg-gradient-to-tr from-blue-50 to-purple-50 rounded-xl text-center shadow-inner border border-gray-100 w-full max-w-2xl">
           <h3 className="font-bold text-2xl text-gray-800 mb-4">💡 Emotion Analysis Result</h3>
